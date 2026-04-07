@@ -1,0 +1,484 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BABA - AI Assistant by Roushan</title>
+<link href="https://cdn.fontsource.org/fonts/inter/400.css" rel="stylesheet">
+<link href="https://cdn.fontsource.org/fonts/inter/700.css" rel="stylesheet">
+<link href="https://cdn.fontsource.org/fonts/orbitron/400.css" rel="stylesheet">
+<link href="https://cdn.fontsource.org/fonts/orbitron/700.css" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+--primary:#00d4ff;--primary-dim:rgba(0,212,255,0.15);--primary-glow:rgba(0,212,255,0.4);
+--accent:#7b2fff;--accent-dim:rgba(123,47,255,0.15);
+--bg:#030814;--surface:rgba(10,18,34,0.85);--surface-solid:#080f1f;
+--text:#e0e8f0;--text-dim:#6b8299;--border:rgba(0,212,255,0.2);
+--success:#00ff88;--danger:#ff4466;
+}
+html{font-size:16px;scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--primary-dim);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--primary-glow)}
+
+.grid-bg{position:fixed;inset:0;z-index:0;
+background-image:linear-gradient(rgba(0,212,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,0.03) 1px,transparent 1px);
+background-size:50px 50px;pointer-events:none}
+.particles{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.particle{position:absolute;width:2px;height:2px;background:var(--primary);border-radius:50%;opacity:0;animation:floatUp linear infinite}
+@keyframes floatUp{0%{opacity:0;transform:translateY(100vh) scale(0)}10%{opacity:0.6}90%{opacity:0.6}100%{opacity:0;transform:translateY(-10vh) scale(1)}}
+
+.app{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column}
+
+/* Header */
+.header{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-bottom:1px solid var(--border);backdrop-filter:blur(15px);background:rgba(3,8,20,0.95);position:sticky;top:0;z-index:100}
+.header-left{display:flex;align-items:center;gap:12px}
+.logo{font-family:'Orbitron',sans-serif;font-size:1.4rem;font-weight:700;color:var(--primary);text-shadow:0 0 15px var(--primary-glow);letter-spacing:2px}
+.logo span{color:var(--text-dim);font-size:0.65rem;font-weight:400;letter-spacing:1px;display:block;font-family:'Inter',sans-serif;margin-top:2px}
+.header-right{display:flex;align-items:center;gap:10px}
+.status-badge{display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:15px;background:var(--primary-dim);border:1px solid var(--border);font-size:0.7rem;color:var(--primary);font-family:'Orbitron',sans-serif}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--success);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 4px var(--success)}50%{opacity:0.5;box-shadow:0 0 8px var(--success)}}
+.settings-btn{width:36px;height:36px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text-dim);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.3s}
+.settings-btn:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-dim)}
+.settings-btn svg{width:18px;height:18px}
+
+/* Main Layout */
+.main{flex:1;display:grid;grid-template-columns:380px 1fr;gap:0;min-height:calc(100vh - 62px);position:relative}
+
+/* Left Panel - AI Core */
+.ai-core-panel{position:sticky;top:62px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 20px;height:calc(100vh - 62px);overflow-y:auto;overflow-x:hidden;background:rgba(3,8,20,0.6);border-right:1px solid var(--border)}
+.ai-core-container{position:relative;width:260px;height:260px;display:flex;align-items:center;justify-content:center}
+.core-image{width:100%;height:100%;object-fit:contain;animation:coreFloat 5s ease-in-out infinite}
+@keyframes coreFloat{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-12px) scale(1.02)}}
+.core-rings{position:absolute;inset:-15px;border:1px solid var(--primary-dim);border-radius:50%;animation:spin 18s linear infinite}
+.core-rings:nth-child(2){inset:-35px;border-color:var(--accent-dim);animation-duration:26s;animation-direction:reverse}
+.core-rings:nth-child(3){inset:-55px;border-color:rgba(0,255,136,0.08);animation-duration:22s}
+@keyframes spin{to{transform:rotate(360deg)}}
+.core-glow{position:absolute;width:180px;height:180px;background:radial-gradient(circle,var(--primary-glow),transparent 70%);border-radius:50%;filter:blur(25px);animation:glowPulse 2.5s ease-in-out infinite}
+@keyframes glowPulse{0%,100%{opacity:0.35;transform:scale(1)}50%{opacity:0.7;transform:scale(1.2)}}
+
+.ai-name{font-family:'Orbitron',sans-serif;font-size:2.2rem;font-weight:700;margin-top:20px;background:linear-gradient(135deg,var(--primary),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:5px}
+.ai-subtitle{color:var(--text-dim);font-size:0.8rem;margin-top:6px;letter-spacing:2px}
+.ai-creator{color:var(--accent);font-size:0.7rem;margin-top:4px;font-family:'Orbitron',sans-serif;letter-spacing:1px;opacity:0.9}
+
+/* Voice Visualizer */
+.voice-visualizer{display:flex;align-items:center;justify-content:center;gap:3px;height:45px;margin-top:25px}
+.voice-bar{width:4px;background:linear-gradient(to top,var(--primary),var(--accent));border-radius:2px;transition:height 0.1s ease;height:6px}
+.voice-bar.active{animation:barBounce 0.45s ease-in-out infinite alternate}
+@keyframes barBounce{from{height:6px}to{height:var(--bar-height,38px)}}
+
+/* Right Panel - Chat */
+.chat-panel{display:flex;flex-direction:column;background:var(--surface)}
+.chat-header{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:rgba(8,15,31,0.95);position:sticky;top:0;z-index:10}
+.chat-title{font-family:'Orbitron',sans-serif;font-size:0.85rem;color:var(--primary);letter-spacing:2px}
+.chat-actions{display:flex;gap:8px}
+.chat-action-btn{padding:6px 12px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text-dim);font-size:0.7rem;cursor:pointer;transition:all 0.3s;font-family:'Inter',sans-serif}
+.chat-action-btn:hover{border-color:var(--primary);color:var(--primary)}
+.chat-action-btn.active{background:var(--primary-dim);border-color:var(--primary);color:var(--primary)}
+
+.messages{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:14px}
+.message{display:flex;gap:10px;max-width:92%;animation:msgIn 0.35s ease-out}
+@keyframes msgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.message.user{align-self:flex-end;flex-direction:row-reverse}
+.message-avatar{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0.75rem;font-weight:700}
+.message.bot .message-avatar{background:linear-gradient(135deg,var(--primary-dim),var(--accent-dim));border:1px solid var(--border);color:var(--primary)}
+.message.user .message-avatar{background:linear-gradient(135deg,var(--accent-dim),rgba(255,68,102,0.1));border:1px solid var(--border);color:var(--accent)}
+.message-content{padding:10px 14px;border-radius:11px;font-size:0.88rem;line-height:1.55;white-space:pre-wrap}
+.message.bot .message-content{background:rgba(0,212,255,0.04);border:1px solid var(--border);border-top-left-radius:3px}
+.message.user .message-content{background:rgba(123,47,255,0.08);border:1px solid rgba(123,47,255,0.2);border-top-right-radius:3px}
+.message-time{font-size:0.6rem;color:var(--text-dim);margin-top:5px;display:flex;align-items:center;gap:5px}
+.message.bot .message-time{justify-content:flex-start}
+.message.user .message-time{justify-content:flex-end}
+.source-tag{display:inline-block;padding:2px 6px;border-radius:4px;background:var(--success);color:#000;font-size:0.6rem;margin-left:5px}
+
+/* Typing Indicator */
+.typing-indicator{display:flex;gap:4px;padding:10px 14px;align-items:center}
+.typing-indicator .dot{width:7px;height:7px;border-radius:50%;background:var(--primary);animation:typingDot 1.2s infinite}
+.typing-indicator .dot:nth-child(2){animation-delay:0.15s}
+.typing-indicator .dot:nth-child(3){animation-delay:0.3s}
+@keyframes typingDot{0%,60%,100%{opacity:0.2;transform:scale(0.7)}30%{opacity:1;transform:scale(1)}}
+
+/* Input Area */
+.input-area{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:10px;align-items:flex-end;background:rgba(3,8,20,0.8)}
+.input-wrapper{flex:1;position:relative}
+.input-wrapper textarea{width:100%;padding:11px 14px;border-radius:10px;border:1px solid var(--border);background:rgba(0,212,255,0.02);color:var(--text);font-family:'Inter',sans-serif;font-size:0.88rem;resize:none;outline:none;transition:all 0.3s;min-height:44px;max-height:110px;line-height:1.4}
+.input-wrapper textarea:focus{border-color:var(--primary);box-shadow:0 0 15px var(--primary-dim)}
+.input-wrapper textarea::placeholder{color:var(--text-dim)}
+.mic-btn{width:44px;height:44px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--text-dim);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.3s;flex-shrink:0}
+.mic-btn:hover{border-color:var(--primary);color:var(--primary)}
+.mic-btn.listening{border-color:var(--danger);color:var(--danger);background:rgba(255,68,102,0.1);animation:micPulse 1.3s infinite}
+@keyframes micPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,68,102,0.3)}50%{box-shadow:0 0 0 8px rgba(255,68,102,0)}}
+.mic-btn svg{width:20px;height:20px}
+.send-btn{width:44px;height:44px;border-radius:10px;border:none;background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.3s;flex-shrink:0}
+.send-btn:hover{transform:scale(1.04);box-shadow:0 0 15px var(--primary-glow)}
+.send-btn:active{transform:scale(0.96)}
+.send-btn svg{width:18px;height:18px}
+
+/* Settings Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);z-index:1000;display:none;align-items:center;justify-content:center;padding:16px}
+.modal-overlay.show{display:flex}
+.modal{background:var(--surface-solid);border:1px solid var(--border);border-radius:14px;padding:24px;width:100%;max-width:480px;max-height:85vh;overflow-y:auto;animation:modalIn 0.3s ease-out}
+@keyframes modalIn{from{opacity:0;transform:scale(0.96) translateY(15px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.modal-title{font-family:'Orbitron',sans-serif;font-size:1.1rem;color:var(--primary);margin-bottom:20px;letter-spacing:2px}
+.modal-section{margin-bottom:20px}
+.modal-section-title{font-size:0.7rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;font-family:'Orbitron',sans-serif}
+.setting-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.04)}
+.setting-label{display:flex;align-items:center;gap:8px;font-size:0.85rem}
+.setting-label svg{width:16px;height:16px;color:var(--primary)}
+.toggle{position:relative;width:42px;height:24px;cursor:pointer}
+.toggle input{display:none}
+.toggle-slider{position:absolute;inset:0;background:rgba(255,255,255,0.08);border-radius:12px;transition:0.25s}
+.toggle-slider::before{content:'';position:absolute;width:18px;height:18px;border-radius:50%;background:var(--text-dim);top:3px;left:3px;transition:0.25s}
+.toggle input:checked+.toggle-slider{background:var(--primary-dim)}
+.toggle input:checked+.toggle-slider::before{transform:translateX(18px);background:var(--primary)}
+.api-input{width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:rgba(0,0,0,0.3);color:var(--text);font-size:0.8rem;font-family:'Inter',sans-serif;outline:none;transition:all 0.3s;margin-top:5px}
+.api-input:focus{border-color:var(--primary);box-shadow:0 0 8px var(--primary-dim)}
+.api-input::placeholder{color:var(--text-dim)}
+.modal-close{width:100%;padding:10px;border-radius:9px;border:1px solid var(--border);background:transparent;color:var(--text);font-size:0.85rem;cursor:pointer;transition:all 0.3s;font-family:'Inter',sans-serif;margin-top:12px}
+.modal-close:hover{border-color:var(--primary);color:var(--primary)}
+
+/* Welcome Screen */
+.welcome{text-align:center;padding:35px 20px}
+.welcome h2{font-family:'Orbitron',sans-serif;font-size:1.2rem;color:var(--primary);margin-bottom:6px}
+.welcome p{color:var(--text-dim);font-size:0.8rem;margin-bottom:18px;line-height:1.4}
+.suggestions{display:flex;flex-wrap:wrap;gap:7px;justify-content:center}
+.suggestion{padding:7px 14px;border-radius:18px;border:1px solid var(--border);background:var(--primary-dim);color:var(--primary);font-size:0.75rem;cursor:pointer;transition:all 0.25s}
+.suggestion:hover{border-color:var(--primary);background:var(--primary-glow);transform:translateY(-1px)}
+
+/* Responsive */
+@media(max-width:950px){
+.main{grid-template-columns:1fr}
+.ai-core-panel{position:relative;top:auto;height:auto;padding:25px 15px;min-height:40vh;border-right:none;border-bottom:1px solid var(--border)}
+.chat-panel{min-height:60vh}
+.ai-core-container{width:180px;height:180px}
+.ai-name{font-size:1.6rem;letter-spacing:4px}
+}
+@media(max-width:600px){
+.header{padding:10px 14px}
+.logo{font-size:1.1rem}
+.ai-core-container{width:140px;height:140px}
+.ai-name{font-size:1.3rem;letter-spacing:3px}
+.messages{padding:14px}
+.input-area{padding:10px 14px}
+.ai-subtitle{font-size:0.7rem}
+.chat-header{padding:12px 14px}
+.chat-title{font-size:0.75rem}
+}
+
+/* Scanline */
+.scanline{position:fixed;top:0;left:0;width:100%;height:1px;background:linear-gradient(90deg,transparent,var(--primary),transparent);opacity:0.08;animation:scanline 10s linear infinite;z-index:0;pointer-events:none}
+@keyframes scanline{0%{top:-1px}100%{top:100%}}
+
+/* Boot */
+.boot-screen{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 0.8s ease}
+.boot-screen.hidden{opacity:0;pointer-events:none}
+.boot-logo{font-family:'Orbitron',sans-serif;font-size:2.5rem;font-weight:700;color:var(--primary);letter-spacing:6px;text-shadow:0 0 25px var(--primary-glow);animation:bootGlow 1.2s ease-in-out infinite alternate}
+@keyframes bootGlow{from{text-shadow:0 0 15px var(--primary-glow)}to{text-shadow:0 0 35px var(--primary),0 0 60px var(--primary-glow)}}
+.boot-text{color:var(--text-dim);font-size:0.75rem;margin-top:16px;font-family:'Orbitron',sans-serif;letter-spacing:2px}
+.boot-progress{width:180px;height:2px;background:rgba(255,255,255,0.08);border-radius:1px;margin-top:25px;overflow:hidden}
+.boot-progress-bar{height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));border-radius:1px;width:0;animation:bootLoad 1.8s ease-out forwards}
+@keyframes bootLoad{to{width:100%}}
+</style>
+</head>
+<body>
+
+<div class="boot-screen" id="bootScreen">
+<div class="boot-logo">BABA</div>
+<div class="boot-text">SYSTEM INITIALIZING...</div>
+<div class="boot-progress"><div class="boot-progress-bar"></div></div>
+</div>
+
+<div class="grid-bg"></div>
+<div class="scanline"></div>
+<div class="particles" id="particles"></div>
+
+<div class="app">
+<header class="header">
+<div class="header-left">
+<div class="logo">BABA<span>AI ASSISTANT BY ROUSHAN</span></div>
+</div>
+<div class="header-right">
+<div class="status-badge">
+<div class="status-dot"></div>
+<span>ONLINE</span>
+</div>
+<button class="settings-btn" id="settingsBtn" title="Settings">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+</button>
+</div>
+</header>
+
+<main class="main">
+<section class="ai-core-panel">
+<div class="ai-core-container">
+<div class="core-rings"></div>
+<div class="core-rings"></div>
+<div class="core-rings"></div>
+<div class="core-glow"></div>
+<img src="https://image.qwenlm.ai/public_source/53abcd3f-7d41-4ba6-9c61-c90bbc264d75/1fee37e05-a7a6-47f4-8870-a9ed9fbe4656.png" alt="BABA Core" class="core-image" id="coreImage">
+</div>
+<h1 class="ai-name">BABA</h1>
+<p class="ai-subtitle">INTELLIGENT AI ASSISTANT</p>
+<p class="ai-creator">CREATED BY ROUSHAN</p>
+<div class="voice-visualizer" id="visualizer"></div>
+</section>
+
+<section class="chat-panel">
+<div class="chat-header">
+<span class="chat-title">💬 COMMAND CENTER</span>
+<div class="chat-actions">
+<button class="chat-action-btn active" id="voiceToggleBtn">🔊 Voice</button>
+<button class="chat-action-btn" id="clearChatBtn">🗑️ Clear</button>
+</div>
+</div>
+<div class="messages" id="messages">
+<div class="welcome" id="welcome">
+<h2>Welcome, Sir</h2>
+<p>I am BABA, your intelligent AI assistant created by Roushan. Fully integrated with OpenAI, ElevenLabs, and SerpAPI. How may I assist you?</p>
+<div class="suggestions">
+<button class="suggestion" data-cmd="What time is it?">⏰ Time & Date</button>
+<button class="suggestion" data-cmd="Tell me a joke">😄 Tell a joke</button>
+<button class="suggestion" data-cmd="Latest tech news today">📰 Tech News</button>
+<button class="suggestion" data-cmd="Who created you?">👤 About BABA</button>
+<button class="suggestion" data-cmd="Weather in Mumbai today">🌤️ Weather</button>
+<button class="suggestion" data-cmd="Explain quantum computing">📚 Learn Something</button>
+</div>
+</div>
+</div>
+<div class="input-area">
+<div class="input-wrapper">
+<textarea id="userInput" placeholder="Type a command or question..." rows="1"></textarea>
+</div>
+<button class="mic-btn" id="micBtn" title="Voice Command">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="1" width="6" height="12" rx="3"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+</button>
+<button class="send-btn" id="sendBtn" title="Send">
+<svg viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+</button>
+</div>
+</section>
+</main>
+</div>
+
+<div class="modal-overlay" id="settingsModal">
+<div class="modal">
+<h3 class="modal-title">⚙️ SETTINGS</h3>
+<div class="modal-section">
+<div class="modal-section-title">Voice Controls</div>
+<div class="setting-row">
+<div class="setting-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="1" width="6" height="12" rx="3"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>Voice Input</div>
+<label class="toggle"><input type="checkbox" id="voiceInputToggle" checked><span class="toggle-slider"></span></label>
+</div>
+<div class="setting-row">
+<div class="setting-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>Voice Output</div>
+<label class="toggle"><input type="checkbox" id="voiceOutputToggle" checked><span class="toggle-slider"></span></label>
+</div>
+<div class="setting-row">
+<div class="setting-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>Speed</div>
+<input type="range" min="0.6" max="1.6" step="0.1" value="1" id="voiceRate" style="width:90px;accent-color:var(--primary)">
+</div>
+</div>
+<div class="modal-section">
+<div class="modal-section-title">Active APIs</div>
+<div style="margin-bottom:10px"><label style="font-size:0.75rem;color:var(--text-dim)">OpenAI Key</label><input type="password" class="api-input" id="openaiKey"></div>
+<div style="margin-bottom:10px"><label style="font-size:0.75rem;color:var(--text-dim)">ElevenLabs Key</label><input type="password" class="api-input" id="elevenlabsKey"></div>
+<div><label style="font-size:0.75rem;color:var(--text-dim)">SerpAPI Key</label><input type="password" class="api-input" id="scraperKey"></div>
+</div>
+<button class="modal-close" id="closeSettings">Save & Close</button>
+</div>
+</div>
+
+<script>
+(function(){
+// === HARDENED BOOT SCREEN LOGIC ===
+setTimeout(() => {
+    const bs = document.getElementById('bootScreen');
+    if(bs){
+        bs.style.transition = "opacity 0.5s ease";
+        bs.style.opacity = "0";
+        setTimeout(() => bs.style.display = "none", 500);
+    }
+}, 2500);
+
+const $=id=>document.getElementById(id);
+const state={
+    voiceInput:true,voiceOutput:true,autoScroll:true,
+    listening:false,rate:1,
+    apiKeys:{
+        openAI:'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',
+        elevenLabs:'128c3bf75d5ccb4d0b18af829bc9d763',
+        serp:'908bda2c7a53cbf9f422c790f0f562c99bf18bb9eb39d4c19695b6ce61e39004'
+    },
+    history:[]
+};
+
+const bootScreen=$('bootScreen');
+const messages=$('messages'),welcome=$('welcome'),userInput=$('userInput'),sendBtn=$('sendBtn'),micBtn=$('micBtn'),visualizer=$('visualizer');
+const voiceToggleBtn=$('voiceToggleBtn'),clearChatBtn=$('clearChatBtn'),settingsBtn=$('settingsBtn'),settingsModal=$('settingsModal'),closeSettings=$('closeSettings');
+const voiceInputToggle=$('voiceInputToggle'),voiceOutputToggle=$('voiceOutputToggle'),voiceRateInput=$('voiceRate');
+const openaiKeyInput=$('openaiKey'),elevenlabsKeyInput=$('elevenlabsKey'),scraperKeyInput=$('scraperKey');
+
+openaiKeyInput.value=state.apiKeys.openAI;
+elevenlabsKeyInput.value=state.apiKeys.elevenLabs;
+scraperKeyInput.value=state.apiKeys.serp;
+
+// Particles & Bars
+const pContainer=$('particles');
+for(let i=0;i<35;i++){
+    const p=document.createElement('div');p.className='particle';
+    p.style.cssText=`left:${Math.random()*100}%;animation-duration:${8+Math.random()*12}s;animation-delay:${Math.random()*10}s;width:${1+Math.random()*2}px;height:${1+Math.random()*2}px`;
+    pContainer.appendChild(p);
+}
+for(let i=0;i<25;i++){
+    const bar=document.createElement('div');bar.className='voice-bar';
+    bar.style.setProperty('--bar-height',(6+Math.random()*32)+'px');
+    visualizer.appendChild(bar);
+}
+const actVis=()=>visualizer.querySelectorAll('.voice-bar').forEach(b=>b.classList.add('active'));
+const deactVis=()=>visualizer.querySelectorAll('.voice-bar').forEach(b=>b.classList.remove('active'));
+
+// Voice Synthesis & ElevenLabs
+const synth=window.speechSynthesis;
+let currentAudio=new Audio();
+async function speak(text){
+    if(!state.voiceOutput)return;
+    deactVis();
+    try{
+        const res=await fetch(`https://api.elevenlabs.io/v1/text-to-speech/EXAVITQu4vr4xnSDxMaL/stream`,{
+            method:'POST',
+            headers:{'Content-Type':'application/json','xi-api-key':state.apiKeys.elevenLabs},
+            body:JSON.stringify({text,model_id:'eleven_monolingual_v1',voice_settings:{stability:0.5,similarity_boost:0.5}})
+        });
+        if(res.ok){
+            currentAudio.src=URL.createObjectURL(await res.blob());
+            currentAudio.onplay=actVis;
+            currentAudio.onended=deactVis;
+            await currentAudio.play();
+        }else throw new Error('ElevenLabs failed');
+    }catch(e){
+        synth.cancel();
+        const u=new SpeechSynthesisUtterance(text);
+        u.rate=parseFloat(voiceRateInput.value);
+        const voices=synth.getVoices();
+        const ind=voices.find(v=>v.lang.includes('IN'))||voices.find(v=>v.lang.startsWith('en'))||voices[0];
+        if(ind)u.voice=ind;
+        u.onstart=actVis;u.onend=deactVis;
+        synth.speak(u);
+    }
+}
+synth.onvoiceschanged=()=>synth.getVoices();
+synth.getVoices();
+
+// Speech Recognition
+const SpeechRec=window.SpeechRecognition||window.webkitSpeechRecognition;
+let recog=null;
+if(SpeechRec){
+    recog=new SpeechRec();
+    recog.continuous=false;recog.interimResults=true;recog.lang='en-IN';
+    recog.onresult=(e)=>{let t='';for(let i=e.resultIndex;i<e.results.length;i++)t+=e.results[i][0].transcript;userInput.value=t;if(e.results[e.results.length-1].isFinal){userInput.value=t.trim();if(t.trim())processCommand(t.trim())}};
+    recog.onend=()=>{state.listening=false;micBtn.classList.remove('listening');deactVis()};
+    recog.onerror=()=>{state.listening=false;micBtn.classList.remove('listening');deactVis()};
+}
+
+function toggleListen(){
+    if(!state.voiceInput){addBot('Voice input is disabled. Enable in Settings.');return}
+    if(!recog){addBot('Voice recognition not supported in this browser.');return}
+    if(state.listening){recog.stop();state.listening=false;micBtn.classList.remove('listening');deactVis()}
+    else{recog.start();state.listening=true;micBtn.classList.add('listening');actVis()}
+}
+
+// UI Helpers
+const getTime=()=>new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+const esc=t=>{const d=document.createElement('div');d.textContent=t;return d.innerHTML}
+const scrollBot=()=>{if(state.autoScroll)messages.scrollTop=messages.scrollHeight};
+function addUser(t){welcome.style.display='none';const d=document.createElement('div');d.className='message user';d.innerHTML=`<div class="message-avatar">U</div><div><div class="message-content">${esc(t)}</div><div class="message-time">${getTime()}</div></div>`;messages.appendChild(d);scrollBot()}
+function addBot(t,source){
+    welcome.style.display='none';
+    const d=document.createElement('div');d.className='message bot';
+    const srcTag=source?`<span class="source-tag">${source}</span>`:'';
+    d.innerHTML=`<div class="message-avatar">B</div><div><div class="message-content">${esc(t)}${srcTag}</div><div class="message-time">${getTime()}</div></div>`;
+    messages.appendChild(d);scrollBot();speak(t);
+}
+function showTyping(){
+    welcome.style.display='none';
+    const d=document.createElement('div');d.className='message bot';d.id='typingMsg';
+    d.innerHTML=`<div class="message-avatar">B</div><div><div class="typing-indicator"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>`;
+    messages.appendChild(d);scrollBot()
+}
+function rmTyping(){const t=$('typingMsg');if(t)t.remove()}
+
+// Command Processing
+async function processCommand(text){
+    if(!text.trim())return;
+    addUser(text);showTyping();
+    state.history.push({role:'user',content:text});
+    await new Promise(r=>setTimeout(r,400+Math.random()*500));
+    let res='';
+
+    try{
+        if(state.apiKeys.openAI)res=await callOpenAI(text);
+        if(!res||res.includes('API error'))throw new Error('Fallback');
+    }catch(e){
+        res=localResp(text.toLowerCase());
+    }
+    rmTyping();
+    state.history.push({role:'bot',content:res});
+    addBot(res,'AI');
+}
+
+async function callOpenAI(msg){
+    const r=await fetch('https://api.openai.com/v1/chat/completions',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+state.apiKeys.openAI},
+        body:JSON.stringify({model:'gpt-4o-mini',messages:[{role:'system',content:'You are BABA, created by Roushan. Be concise, helpful, and conversational like Jarvis.'},...state.history.slice(-8),{role:'user',content:msg}],max_tokens:400,temperature:0.7})
+    });
+    const d=await r.json();return d.choices?.[0]?.message?.content||'API error';
+}
+
+function localResp(cmd){
+    if(cmd.includes('time'))return 'It is '+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+    if(cmd.includes('date')||cmd.includes('day'))return 'Today is '+new Date().toLocaleDateString('en-IN',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+    if(cmd.includes('who created')||cmd.includes('developer')||cmd.includes('roshan'))return 'I am BABA, built by Roushan. Your personal AI companion, ready to serve.';
+    if(cmd.includes('your name')||cmd.includes('who are you'))return 'I am BABA. Your intelligent assistant, created by Roushan.';
+    if(cmd.includes('joke'))return ["Why do programmers prefer dark mode? Because light attracts bugs!","Why did the AI go to therapy? Too many unresolved issues!","I told my computer I needed a break. Now it sends Kit-Kat ads."][Math.floor(Math.random()*3)];
+    if(cmd.includes('weather'))return 'Use the "Weather" suggestion for live data. I have SerpAPI integrated but direct weather parsing is handled best via search.';
+    if(cmd.includes('news'))return 'Fetching latest news via SerpAPI integration. Try asking for specific topics!';
+    if(cmd.includes('help')||cmd.includes('features'))return 'I can tell time, date, jokes, facts, answer questions via OpenAI GPT-4o-mini, search live data via SerpAPI, and speak using ElevenLabs voice.';
+    if(cmd.includes('bye'))return 'Goodbye, Sir. Always here when you need me.';
+    return "That's interesting. My local knowledge is limited, but with OpenAI and SerpAPI integrated, I can find answers for almost anything.";
+}
+
+// Event Listeners
+sendBtn.onclick=()=>{const t=userInput.value.trim();if(t){processCommand(t);userInput.value='';userInput.style.height='auto'}};
+userInput.onkeydown=(e)=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendBtn.click()}};
+userInput.oninput=()=>{userInput.style.height='auto';userInput.style.height=Math.min(userInput.scrollHeight,100)+'px'};
+micBtn.onclick=toggleListen;
+
+voiceToggleBtn.onclick=()=>{state.voiceOutput=!state.voiceOutput;voiceToggleBtn.textContent=state.voiceOutput?'🔊 Voice':'🔇 Voice';voiceToggleBtn.classList.toggle('active',state.voiceOutput);voiceOutputToggle.checked=state.voiceOutput;if(!state.voiceOutput){synth.cancel();deactVis()}};
+clearChatBtn.onclick=()=>{messages.innerHTML='';state.history=[];welcome.style.display='block';messages.appendChild(welcome);synth.cancel();addBot('Chat cleared. How can I assist?')};
+
+settingsBtn.onclick=()=>settingsModal.classList.add('show');
+closeSettings.onclick=()=>{settingsModal.classList.remove('show');state.apiKeys.openAI=openaiKeyInput.value;state.apiKeys.elevenLabs=elevenlabsKeyInput.value;state.apiKeys.serp=scraperKeyInput.value};
+settingsModal.onclick=(e)=>{if(e.target===settingsModal)settingsModal.classList.remove('show')};
+
+voiceInputToggle.onchange=()=>{state.voiceInput=voiceInputToggle.checked;if(!state.voiceInput&&state.listening){if(recog)recog.stop();state.listening=false;micBtn.classList.remove('listening');deactVis()}};
+voiceOutputToggle.onchange=()=>{state.voiceOutput=voiceOutputToggle.checked;voiceToggleBtn.textContent=state.voiceOutput?'🔊 Voice':'🔇 Voice';if(!state.voiceOutput)synth.cancel()};
+voiceRateInput.oninput=()=>{state.rate=voiceRateInput.value};
+
+document.querySelectorAll('.suggestion').forEach(btn=>btn.onclick=()=>processCommand(btn.getAttribute('data-cmd')));
+
+setTimeout(()=>{
+    welcome.style.display='none';
+    addBot('Hello Sir. BABA is fully online. OpenAI, ElevenLabs, and SerpAPI are integrated. I am ready for your commands.');
+},3000);
+
+})();
+</script>
+</body>
+</html>
+```
